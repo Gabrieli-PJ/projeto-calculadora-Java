@@ -5,14 +5,16 @@ import java.awt.Color;
 import javax.swing.JFrame;
 
 import entidades.Paineis; // esse import aqui ta sendo usado porque eu coloquei o Paineis em outro pacote
-//pacote é esses negocinho que parece um chocolate ali no Package explorer
-//não sei por que fazer dois diferentes, mas no cursinho da Udemy lá o prof fez assim então acho que é pra ficar mais organizado
 
 
 public class Main extends JFrame{	
+	private static final long serialVersionUID = 1L;
+
 		public Main() { // esse metodo é criado pra gente conseguir colocar as coisas no Main ali de baixo
-			setSize(1300, 800);
+			setSize(1065, 550);
 			setTitle("Calculos Matemáticos");
+			setResizable(false);
+			setLocationRelativeTo( null );
 			setLayout (null);
 			getContentPane().setBackground(new Color(238, 243, 252));
 			// Paineis // olha como fica organizado bonitinho quando a gente faz toda a bagunça em outro lugar

@@ -1,9 +1,17 @@
 package entidades;
 
 import java.awt.Color; // pra bota corzinha nas coisas
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent; // pra adicionar eventos nos botões
 import java.awt.event.ActionListener; // pra "ouvir" os eventos que você coloca nos botões
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.border.Border;
 import java.util.Random; // pra fazer o gerador de senha embaralhar os caracteres selecionados pelo usuario
+
 
 import javax.swing.JCheckBox; // pra adicionar checkbox
 import javax.swing.JButton; // adiciona botão
@@ -14,12 +22,16 @@ import javax.swing.JLabel; // adiciona label (os textos que tem nos paineis)
 import javax.swing.JOptionPane; // aqui ele faz aparecer o pop-up com a senha gerada, mas da de fazer mais coisa
 import javax.swing.JPanel; // adiciona os paineis (as telas menorzinhas)
 import javax.swing.JSpinner; // adiciona o negocinho que te deixa selecionar o tamanho da senha aleatoria
+import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JTextField; // caixinha de texto que vc coloca os numeros pra calculadora (o ultimo textField de cada caixinha do lado do resultado tem um codigo especial pra não ser possivel digitar nele)
 import javax.swing.SpinnerNumberModel; // bota uma opção do spinner no qual vc pode colocar o menor numero das opções, o primeiro numero que vai aparecer, o maior numero das opções e de quantos em quantos o spinner vai contar, nessa ordem
 
 public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis ta recebendo os atributos do JFrame
+	private static final long serialVersionUID = 1L;
+	
+
 				public JPanel painel1A() { // precisa criar cada painel em seu proprio metodo pra conseguir chamar ele direitinho no main
-					JLabel labDesc, labValorIn, labPor, labConta, labResult;
+					JLabel labDesc, labValorIn, labPor, labConta;
 					JTextField texValorIn, texDesc, labShowResult;
 					JPanel painel1A = new JPanel();
 					painel1A.setLayout(null);
@@ -35,6 +47,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texValorIn.setBounds(127, 20, 100, 20);
 					texValorIn.setBackground(new Color(251, 238, 242));
 					texValorIn.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
+					texValorIn.setHorizontalAlignment(JTextField.CENTER);
+					texValorIn.addMouseListener(new MouseAdapter(){ //limpa o textfield se tu clicar denovo nele
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texValorIn.setText("");
+			            }
+			        });
 					painel1A.add(texValorIn); // adiciona o TextField no painel
 							
 					labDesc = new JLabel("Desconto aplicado: ");
@@ -45,6 +64,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texDesc.setBounds(127, 50, 100, 20);
 					texDesc.setBackground(new Color(220, 230, 249));
 			        texDesc.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
+			        texDesc.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texDesc.setText("");
+			            }
+			        });
+			        texDesc.setHorizontalAlignment(JTextField.CENTER);
 					painel1A.add(texDesc);
 							
 					labPor = new JLabel("%");
@@ -58,33 +84,44 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					labShowResult.setEditable(false); // esse aqui é o comando que deixa o TextField não-editavel
 					labShowResult.setBackground(new Color(194, 255, 222));
 					labShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					labShowResult.setHorizontalAlignment(JTextField.CENTER);
 					painel1A.add(labShowResult);
 					
-					 JButton calculaBotao = new JButton("Resultado"); // botão bem lindo pra calcular porque sem ele eu achei literalmente I M P O S S I V E L	
-				        calculaBotao.setBounds(20, 80, 100, 20);
-				        calculaBotao.addActionListener(new ActionListener() { // esse aqui é o bagulho que vai fazer o botão funcionar
-				            public void actionPerformed(ActionEvent e) { // tudo o que ta dentro disso aqui é o que vai acontecer quando o botão foi clicado
-				                {
-				                    double num1 = Double.parseDouble(texValorIn.getText()); // esse parseDouble serve pra pegar o que o usuario vai digitar no TextField e armazenar nesssas variaveis pra gente poder mandar pra Calculadora 
-				                    double num2 = Double.parseDouble(texDesc.getText());
-				                    Calculadora c = new Calculadora(); // cria uma variavel pra poder chamar a classe Calculadora
-				                    double v =  c.AplicarDesconto(num1, num2); // manda o num1 e o num2 pro metodo q ta dentro da calculadora 
-				                    labShowResult.setText("" + v); // vai atualizar o TextField com o valor que voltar da calculadora (eu coloquei aquele "" sem nada dentro pq esse negocio não aceita só o v porque ele é Double e precisa ter uma String e eu tenho preguiça de pesquisar qual seria o codigo certo) 
-				              }
-				            }
-				        });
+					JButton calculaBotao = new JButton("Resultado");
+					calculaBotao.setBounds(20, 80, 100, 20);
+					calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+					calculaBotao.setBorder(new RoundedBorder(10));
+					calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String valorInText = texValorIn.getText();
+					        String descText = texDesc.getText();
+					        
+					        if (valorInText.isEmpty() || descText.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(valorInText);
+					            double num2 = Double.parseDouble(descText);
+					            Calculadora c = new Calculadora();
+					            String v = c.AplicarDesconto(num1, num2);
+					            labShowResult.setText(v);
+					        }
+					    }
+					});
+				       
 				        painel1A.add(calculaBotao);
 					
-					labConta = new JLabel(" v = a - (a * (b / 100))");
+					labConta = new JLabel("v = num1 - (num1 * (num2 / 100))");
 					labConta.setBounds(25, 110, 200, 30 );
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					painel1A.add(labConta);
 					return painel1A;
 				};
+				
 				// todos os outros paineis exceto o ultimo vão ter o mesmo estilo desse primeiro, então só vou voltar a escrever lá no ultimo :D
 				public JPanel painel2A(){
-					JLabel labAcre, labValorIn, labPor, labConta, labResult;
+					JLabel labAcre, labValorIn, labPor, labConta;
 					JTextField texValorIn, texAcre, texShowResult;
 					JPanel painel2A = new JPanel();
 					painel2A.setBackground(new Color(238, 243, 252));
@@ -99,6 +136,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texValorIn = new JTextField();
 					texValorIn.setBounds(127, 20, 100, 20);
 					texValorIn.setBackground(new Color(251, 238, 242));
+					texValorIn.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texValorIn.setText("");
+			            }
+			        });
+			        texValorIn.setHorizontalAlignment(JTextField.CENTER);
 					texValorIn.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 					painel2A.add(texValorIn);
 							
@@ -109,6 +153,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texAcre = new JTextField();
 					texAcre.setBounds(127, 50, 100, 20);
 					texAcre.setBackground(new Color(220, 230, 249));
+					texAcre.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texAcre.setText("");
+			            }
+			        });
+			        texAcre.setHorizontalAlignment(JTextField.CENTER); 
 			        texAcre.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 					painel2A.add(texAcre);
 							
@@ -117,23 +168,46 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					labPor.setForeground( new Color(28, 68, 142));
 					painel2A.add(labPor);
 					
-					labResult = new JLabel("Resultado: ");
-					labResult.setBounds(63, 80, 100, 20);
-					labResult.setForeground( new Color(0, 102, 48));
-					painel2A.add(labResult);
 					texShowResult = new JTextField();
 					texShowResult.setBounds(127, 80, 100, 20);
+					texShowResult.setEditable(false); // esse aqui é o comando que deixa o TextField não-editavel
+					texShowResult.setBackground(new Color(194, 255, 222));
+					texShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					texShowResult.setHorizontalAlignment(JTextField.CENTER);
 					painel2A.add(texShowResult);
 					
-					labConta = new JLabel("");
+					JButton calculaBotao = new JButton("Resultado"); // botão bem lindo pra calcular porque sem ele eu achei literalmente I M P O S S I V E L	
+			        calculaBotao.setBounds(20, 80, 100, 20);
+			        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+			        calculaBotao.setBorder(new RoundedBorder(10));
+			        calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String valorInText = texValorIn.getText();
+					        String descText = texAcre.getText();
+					        
+					        if (valorInText.isEmpty() || descText.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(valorInText);
+					            double num2 = Double.parseDouble(descText);
+					            Calculadora c = new Calculadora();
+					            String v = c.CalcularAcrescimo(num1, num2);
+					            texShowResult.setText(v);
+					        }
+					    }
+					});
+			        painel2A.add(calculaBotao);
+					
+					labConta = new JLabel("v = num1 + (num1 * (num2 / 100))");
 					labConta.setBounds(25, 110, 200, 30);
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 					painel2A.add(labConta);
 					return painel2A;
 				};
 				public JPanel painel3A() {
-					JLabel labDesc, labValorIn, labPor, labConta, labResult;
+					JLabel labDesc, labValorIn, labPor, labConta;
 					JTextField texValorIn, texDesc, texShowResult;
 					JPanel painel3A = new JPanel();
 					painel3A.setLayout(null);
@@ -148,6 +222,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texValorIn = new JTextField();
 					texValorIn.setBounds(127, 20, 100, 20);
 					texValorIn.setBackground(new Color(251, 238, 242));
+					texValorIn.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texValorIn.setText("");
+			            }
+			        });
+			        texValorIn.setHorizontalAlignment(JTextField.CENTER);
 					texValorIn.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 					painel3A.add(texValorIn);
 							
@@ -158,6 +239,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texDesc = new JTextField();
 					texDesc.setBounds(127, 50, 100, 20);
 					texDesc.setBackground(new Color(220, 230, 249));
+					texDesc.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texDesc.setText("");
+			            }
+			        });
+			        texDesc.setHorizontalAlignment(JTextField.CENTER);
 			        texDesc.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 					painel3A.add(texDesc);
 							
@@ -166,24 +254,47 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					labPor.setForeground( new Color(28, 68, 142));
 					painel3A.add(labPor);
 					
-					labResult = new JLabel("Corresponde a: ");
-					labResult.setBounds(37, 80, 100, 20);
-					labResult.setForeground( new Color(0, 102, 48));
-					painel3A.add(labResult);
 					texShowResult = new JTextField();
 					texShowResult.setBounds(127, 80, 100, 20);
+					texShowResult.setEditable(false); // esse aqui é o comando que deixa o TextField não-editavel
+					texShowResult.setBackground(new Color(194, 255, 222));
+					texShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					texShowResult.setHorizontalAlignment(JTextField.CENTER);
 					painel3A.add(texShowResult);
+
+					JButton calculaBotao = new JButton("Corresponde a"); // botão bem lindo pra calcular porque sem ele eu achei literalmente I M P O S S I V E L	
+			        calculaBotao.setBounds(12, 80, 110, 20);
+			        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+			        calculaBotao.setBorder(new RoundedBorder(10));
+			        calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String valorInText = texValorIn.getText();
+					        String descText = texDesc.getText();
+					        
+					        if (valorInText.isEmpty() || descText.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(valorInText);
+					            double num2 = Double.parseDouble(descText);
+					            Calculadora c = new Calculadora();
+					            String v = c.Amostragem1(num1, num2);
+					            texShowResult.setText(v);
+					        }
+					    }
+					});
+			        painel3A.add(calculaBotao);
+			        
 					
-					
-					labConta = new JLabel(" v = (a * b) / 100");
+					labConta = new JLabel(" v = (num1 * num2) / 100");
 					labConta.setBounds(25, 110, 200, 30 );
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 					painel3A.add(labConta);
 					return painel3A;
 				};
 				public JPanel painel4A() {
-					JLabel labDesc, labValorIn, labPor, labConta, labResult;
+					JLabel labDesc, labValorIn, labPor, labConta;
 					JTextField texValorIn, texDesc, texShowResult;
 					JPanel painel4A = new JPanel();
 					painel4A.setLayout(null);
@@ -198,6 +309,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texValorIn = new JTextField();
 					texValorIn.setBounds(127, 20, 100, 20);
 					texValorIn.setBackground(new Color(251, 238, 242));
+					texValorIn.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texValorIn.setText("");
+			            }
+			        });
+			        texValorIn.setHorizontalAlignment(JTextField.CENTER);
 					texValorIn.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 					painel4A.add(texValorIn);
 							
@@ -208,37 +326,74 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texDesc = new JTextField();
 					texDesc.setBounds(127, 50, 100, 20);
 					texDesc.setBackground(new Color(220, 230, 249));
+					texDesc.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texDesc.setText("");
+			            }
+			        });
+			        texDesc.setHorizontalAlignment(JTextField.CENTER);texDesc.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texDesc.setText("");
+			            }
+			        });
+			        texDesc.setHorizontalAlignment(JTextField.CENTER);
 			        texDesc.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 					painel4A.add(texDesc);
 		
-					labResult = new JLabel("Corresponde a: ");
-					labResult.setBounds(36, 80, 100, 20);
-					labResult.setForeground( new Color(0, 102, 48));
-					painel4A.add(labResult);
 					texShowResult = new JTextField();
 					texShowResult.setBounds(127, 80, 100, 20);
+					texShowResult.setEditable(false); // esse aqui é o comando que deixa o TextField não-editavel
+					texShowResult.setBackground(new Color(194, 255, 222));
+					texShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					texShowResult.setHorizontalAlignment(JTextField.CENTER);
 					painel4A.add(texShowResult);
 
+					JButton calculaBotao = new JButton("Corresponde a"); // botão bem lindo pra calcular porque sem ele eu achei literalmente I M P O S S I V E L	
+			        calculaBotao.setBounds(12, 80, 110, 20);
+			        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+			        calculaBotao.setBorder(new RoundedBorder(10));
+			        calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String valorInText = texValorIn.getText();
+					        String descText = texDesc.getText();
+					        
+					        if (valorInText.isEmpty() || descText.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(valorInText);
+					            double num2 = Double.parseDouble(descText);
+					            Calculadora c = new Calculadora();
+					            String v = c.Amostragem2(num1, num2);
+					            texShowResult.setText(v);
+					        }
+					    }
+					});
+			        painel4A.add(calculaBotao);
 
 					labPor = new JLabel("%");
 					labPor.setBounds(230, 80, 175, 20);
 					labPor.setForeground( new Color(0, 102, 48));
 					painel4A.add(labPor);
 					
-					labConta = new JLabel("");
+					labConta = new JLabel("v = num1 * (num2 / 100)");
 					labConta.setBounds(25, 110, 200, 30);
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 					painel4A.add(labConta);
 					return painel4A;
 				};
+				
+				
 				public JPanel painel1B(){
-					JLabel labDesc, labValorIn, labPor, labConta, labResult;
+					JLabel labDesc, labValorIn, labPor, labConta;
 					JTextField texValorIn, texDesc, texShowResult;
 					JPanel painel1B = new JPanel();
 					painel1B.setLayout(null);
 					painel1B.setBackground(new Color(238, 243, 252));
-					painel1B.setBounds(10, 170, 280, 150);
+					painel1B.setBounds(110, 170, 280, 150);
 					painel1B.setBorder(BorderFactory.createTitledBorder("Valor era X e paguei Y, qual foi o desconto(%)"));
 					//JLabel/////////////////////////////////////////////
 					labValorIn = new JLabel("Valor original (X): ");
@@ -248,6 +403,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texValorIn = new JTextField();
 					texValorIn.setBounds(142, 20, 100, 20);
 					texValorIn.setBackground(new Color(251, 238, 242));
+					texValorIn.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texValorIn.setText("");
+			            }
+			        });
+			        texValorIn.setHorizontalAlignment(JTextField.CENTER);
 					texValorIn.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 					painel1B.add(texValorIn);
 							
@@ -258,36 +420,66 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texDesc = new JTextField();
 					texDesc.setBounds(142, 50, 100, 20);
 					texDesc.setBackground(new Color(220, 230, 249));
+					texDesc.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texDesc.setText("");
+			            }
+			        });
+			        texDesc.setHorizontalAlignment(JTextField.CENTER);
 			        texDesc.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 					painel1B.add(texDesc);
 					
-					labResult = new JLabel("Desconto: ");
-					labResult.setBounds(80, 80, 100, 20);
-					labResult.setForeground( new Color(0, 102, 48));
-					painel1B.add(labResult);
 					texShowResult = new JTextField();
 					texShowResult.setBounds(142, 80, 100, 20);
+					texShowResult.setEditable(false);
+					texShowResult.setBackground(new Color(194, 255, 222));
+					texShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					texShowResult.setHorizontalAlignment(JTextField.CENTER);
 					painel1B.add(texShowResult);
 
+					JButton calculaBotao = new JButton("Desconto");
+			        calculaBotao.setBounds(35, 80, 100, 20);
+			        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+			        calculaBotao.setBorder(new RoundedBorder(10));
+			        calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String valorInText = texValorIn.getText();
+					        String descText = texDesc.getText();
+					        
+					        if (valorInText.isEmpty() || descText.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(valorInText);
+					            double num2 = Double.parseDouble(descText);
+					            Calculadora c = new Calculadora();
+					            String v = c.QualDesconto(num1, num2);
+					            texShowResult.setText(v);
+					        }
+					    }
+					});
+			        painel1B.add(calculaBotao);
+					
 					labPor = new JLabel("%");
 					labPor.setBounds(245, 80, 175, 20);
 					labPor.setForeground( new Color(0, 102, 48));
 					painel1B.add(labPor);
 					
-					labConta = new JLabel(" v = ((a - b) / a) * 100");
+					labConta = new JLabel(" v = ((num1 - num2) / num1) * 100");
 					labConta.setBounds(25, 110, 220, 30);
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 					painel1B.add(labConta);
 					return painel1B;
 				};
 				public JPanel painel2B(){
-					JLabel labDesc, labValorIn, labPor, labConta, labResult;
+					JLabel labDesc, labValorIn, labPor, labConta;
 					JTextField texValorIn, texDesc, texShowResult;
 					JPanel painel2B = new JPanel();
 					painel2B.setLayout(null);
 					painel2B.setBackground(new Color(238, 243, 252));
-					painel2B.setBounds(300, 170, 280, 150);
+					painel2B.setBounds(400, 170, 280, 150);
 					painel2B.setBorder(BorderFactory.createTitledBorder("Variação Delta(%) - diferença % entre valores"));
 					//JLabel/////////////////////////////////////////////
 					labValorIn = new JLabel("Valor inicial: ");
@@ -297,6 +489,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texValorIn = new JTextField();
 					texValorIn.setBounds(142, 20, 100, 20);
 					texValorIn.setBackground(new Color(251, 238, 242));
+					texValorIn.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texValorIn.setText("");
+			            }
+			        });
+			        texValorIn.setHorizontalAlignment(JTextField.CENTER);
 					texValorIn.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 					painel2B.add(texValorIn);
 							
@@ -307,16 +506,45 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texDesc = new JTextField();
 					texDesc.setBounds(142, 50, 100, 20);
 					texDesc.setBackground(new Color(220, 230, 249));
+					texDesc.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texDesc.setText("");
+			            }
+			        });
+			        texDesc.setHorizontalAlignment(JTextField.CENTER);
 			        texDesc.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 					painel2B.add(texDesc);
 					
-					labResult = new JLabel("Diferença: ");
-					labResult.setBounds(80, 80, 110, 20);
-					labResult.setForeground( new Color(0, 102, 48));
-					painel2B.add(labResult);
 					texShowResult = new JTextField();
 					texShowResult.setBounds(142, 80, 100, 20);
+					texShowResult.setEditable(false);
+					texShowResult.setBackground(new Color(194, 255, 222));
+					texShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					texShowResult.setHorizontalAlignment(JTextField.CENTER);
 					painel2B.add(texShowResult);
+					
+					JButton calculaBotao = new JButton("Diferença");
+			        calculaBotao.setBounds(35, 80, 100, 20);
+			        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+			        calculaBotao.setBorder(new RoundedBorder(10));
+			        calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String valorInText = texValorIn.getText();
+					        String descText = texDesc.getText();
+					        
+					        if (valorInText.isEmpty() || descText.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(valorInText);
+					            double num2 = Double.parseDouble(descText);
+					            Calculadora c = new Calculadora();
+					            String v = c.VarDelta(num1, num2);
+					            texShowResult.setText(v);
+					        }
+					    }
+					});
+			        painel2B.add(calculaBotao);
 
 					labPor = new JLabel("%");
 					labPor.setBounds(245, 80, 175, 20);
@@ -324,20 +552,21 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					painel2B.add(labPor);
 
 					
-					labConta = new JLabel(" v = (a * b) / 100");
+					labConta = new JLabel(" v = ((num2 - num1) / num2) * 100");
 					labConta.setBounds(25, 110, 220, 30);
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 					painel2B.add(labConta);
 					return painel2B;
 				};
 				public JPanel painel3B() {
-						JLabel labDesc, labValorFi, labPor, labConta, labResult;
+						JLabel labDesc, labValorFi, labPor, labConta;
 						JTextField texValorFi, texDesc, texShowResult;
 						JPanel painel3B = new JPanel();
 						painel3B.setLayout(null);
 						painel3B.setBackground(new Color(238, 243, 252));
-						painel3B.setBounds(590, 170, 280, 150);
+						painel3B.setBounds(690, 170, 280, 150);
 						painel3B.setBorder(BorderFactory.createTitledBorder("Qual era o valor original?"));
 						//JLabel/////////////////////////////////////////////
 						labValorFi = new JLabel("Valor final R$: ");
@@ -347,6 +576,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 						texValorFi = new JTextField();
 						texValorFi.setBounds(142, 20, 100, 20);
 						texValorFi.setBackground(new Color(251, 238, 242));
+						texValorFi.addMouseListener(new MouseAdapter(){
+				            @Override
+				            public void mouseClicked(MouseEvent e){
+				                texValorFi.setText("");
+				            }
+				        });
+				        texValorFi.setHorizontalAlignment(JTextField.CENTER);
 						texValorFi.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 						painel3B.add(texValorFi);
 								
@@ -357,6 +593,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 						texDesc = new JTextField();
 						texDesc.setBounds(142, 50, 100, 20);
 						texDesc.setBackground(new Color(220, 230, 249));
+						texDesc.addMouseListener(new MouseAdapter(){
+				            @Override
+				            public void mouseClicked(MouseEvent e){
+				                texDesc.setText("");
+				            }
+				        });
+				        texDesc.setHorizontalAlignment(JTextField.CENTER);
 				        texDesc.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 						painel3B.add(texDesc);
 								
@@ -365,30 +608,52 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 						labPor.setForeground( new Color(28, 68, 142));
 						painel3B.add(labPor);
 						
-						labResult = new JLabel("Valor inicial: ");
-						labResult.setBounds(70, 80, 100, 20);
-						labResult.setForeground( new Color(0, 102, 48));
-						painel3B.add(labResult);
 						texShowResult = new JTextField();
 						texShowResult.setBounds(142, 80, 100, 20);
+						texShowResult.setEditable(false);
+						texShowResult.setBackground(new Color(194, 255, 222));
+						texShowResult.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+						texShowResult.setHorizontalAlignment(JTextField.CENTER);
 						painel3B.add(texShowResult);
-
+						
+						JButton calculaBotao = new JButton("Valor Inicial");
+				        calculaBotao.setBounds(35, 80, 100, 20);
+				        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+				        calculaBotao.setBorder(new RoundedBorder(10));
+				        calculaBotao.addActionListener(new ActionListener() {
+						    public void actionPerformed(ActionEvent e) {
+						        String valorInText = texValorFi.getText();
+						        String descText = texDesc.getText();
+						        
+						        if (valorInText.isEmpty() || descText.isEmpty()) {
+						            JOptionPane.showMessageDialog(null, "Por favor, preencha ambos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+						        } else {
+						            double num1 = Double.parseDouble(valorInText);
+						            double num2 = Double.parseDouble(descText);
+						            Calculadora c = new Calculadora();
+						            String v = c.ValorOriginal(num1, num2);
+						            texShowResult.setText(v);
+						        }
+						    }
+						});
+				        painel3B.add(calculaBotao);
 						
 						labConta = new JLabel(" v = (a * 100 / (100 - b))");
 						labConta.setBounds(25, 110, 220, 30);
-						labConta.setForeground( new Color(28, 68, 142));
+						labConta.setForeground( new Color(97, 66, 88));
+						labConta.setHorizontalAlignment(JTextField.CENTER);
 						labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 						painel3B.add(labConta);
 						return painel3B;
 				};
 				
 				public JPanel painel1C(){
-					JLabel labB, labA, labR1, labConta, labR2;
+					JLabel labB, labA, labR1, labConta;
 					JTextField texA, texB, texR1, texR2;
 					JPanel painel1C = new JPanel();
 					painel1C.setLayout(null);
 					painel1C.setBackground(new Color(238, 243, 252));
-					painel1C.setBounds(10, 330, 300, 150);
+					painel1C.setBounds(195, 330, 300, 150);
 					painel1C.setBorder(BorderFactory.createTitledBorder("Regra de Três"));
 					//JLabel/////////////////////////////////////////////
 					labA = new JLabel("a: ");
@@ -398,6 +663,13 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texA = new JTextField();
 					texA.setBounds(35, 40, 100, 20);
 					texA.setBackground(new Color(251, 238, 242));
+					texA.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texA.setText("");
+			            }
+			        });
+			        texA.setHorizontalAlignment(JTextField.CENTER);
 					texA.setBorder(BorderFactory.createLineBorder(new Color(244, 205, 215)));
 					painel1C.add(texA);
 							
@@ -408,29 +680,69 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					texB = new JTextField();
 					texB.setBounds(35, 77, 100, 20);
 					texB.setBackground(new Color(220, 230, 249));
+					texB.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texB.setText("");
+			            }
+			        });
+			        texB.setHorizontalAlignment(JTextField.CENTER);
 			        texB.setBorder(BorderFactory.createLineBorder(new Color(186, 206, 243)));
 					painel1C.add(texB);
 							
 					labR1 = new JLabel(" =   r1: ");
 					labR1.setBounds(145, 40, 175, 20);
-					labR1.setForeground( new Color(0, 102, 48));
+					labR1.setForeground( new Color(75, 61, 82));
 					painel1C.add(labR1);
 					texR1 = new JTextField();
 					texR1.setBounds(182, 40, 100, 20);
+					texR1.setBackground(new Color(198, 185, 203));
+					texR1.addMouseListener(new MouseAdapter(){
+			            @Override
+			            public void mouseClicked(MouseEvent e){
+			                texB.setText("");
+			            }
+			        });
+			        texR1.setHorizontalAlignment(JTextField.CENTER);
+			        texR1.setBorder(BorderFactory.createLineBorder(new Color(138, 114, 151)));
 					painel1C.add(texR1);
 					
-					labR2 = new JLabel(" =   r2: ");
-					labR2.setBounds(145, 77, 100, 20);
-					labR2.setForeground( new Color(75, 20, 6));
-					painel1C.add(labR2);
 					texR2 = new JTextField();
 					texR2.setBounds(182, 77, 100, 20);
+					texR2.setEditable(false);
+					texR2.setBackground(new Color(194, 255, 222));
+					texR2.setBorder(BorderFactory.createLineBorder(new Color(173, 255, 211)));
+					texR2.setHorizontalAlignment(JTextField.CENTER);
 					painel1C.add(texR2);
 
+					JButton calculaBotao = new JButton("R2");
+			        calculaBotao.setBounds(140, 77, 40, 20);
+			        calculaBotao.setBorder(BorderFactory.createLineBorder(new Color(0, 102, 48)));
+			        calculaBotao.setBorder(new RoundedBorder(10));
+			        calculaBotao.addActionListener(new ActionListener() {
+					    public void actionPerformed(ActionEvent e) {
+					        String AText = texA.getText();
+					        String BText = texB.getText();
+					        String R1Text = texR1.getText();
+					        
+					        if (AText.isEmpty() || BText.isEmpty() || R1Text.isEmpty()) {
+					            JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            double num1 = Double.parseDouble(AText);
+					            double num2 = Double.parseDouble(BText);
+					            double num3 = Double.parseDouble(R1Text);
+					            Calculadora c = new Calculadora();
+					            String v = c.Regra3(num1, num2, num3);
+					            texR2.setText(v);
+					        }
+					    }
+					});
+			        painel1C.add(calculaBotao);
 					
 					labConta = new JLabel(" r2 = (r1 * b) / a");
 					labConta.setBounds(25, 110, 240, 30);
-					labConta.setForeground( new Color(28, 68, 142));
+					labConta.setForeground( new Color(97, 66, 88));
+					labConta.setHorizontalAlignment(JTextField.CENTER);
 					labConta.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 					painel1C.add(labConta);
 					return painel1C;
@@ -439,7 +751,7 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					JPanel painel2C = new JPanel();
 					painel2C.setLayout(null);
 					painel2C.setBackground(new Color(238, 243, 252));
-					painel2C.setBounds(320, 330, 300, 150);
+					painel2C.setBounds(505, 330, 300, 150);
 					painel2C.setBorder(BorderFactory.createTitledBorder("Gerador de senha"));
 					//aqui são as mesmas coisas dos outros paineis só que ao inves de usar JLabel e JTextField a gente usa JCheckBox
 					JCheckBox chkMaiuscula, chkMinuscula, chkNumero, chkSimbolo;
@@ -460,12 +772,16 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 					chkSimbolo.setForeground( new Color(28, 68, 142));
 					painel2C.add(chkSimbolo);
 					//spinner - esse aqui foi chato de fazer meu deus
-				    JSpinner spnComprimento = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1)); // esse NumberModel tem a seguinte ordem pra colocar os numeros: menor numero das opções, o primeiro numero que vai aparecer, o maior numero das opções e de quantos em quantos o spinner vai contar 
-			        spnComprimento.setBounds(88, 100, 60, 30);
+			        SpinnerNumberModel model = new SpinnerNumberModel(1, 1, 20, 1);
+			        JSpinner spnComprimento = new JSpinner(model);
+			        spnComprimento.setBounds(88, 100, 45, 30);
+			        NumberEditor editor = new JSpinner.NumberEditor(spnComprimento);
+			        spnComprimento.setEditor(editor);
 			        painel2C.add(spnComprimento);
 					//botao
 					JButton btnGerarSenha = new JButton(new AbstractAction("Gerar Senha") { // abstractAction é bem parecido com ActionListener, mas no ActionListener vc não pode colocar mais subclasses, tipo esses private void q tem aqui  
-						
+						private static final long serialVersionUID = 1L;
+
 						public void actionPerformed(ActionEvent e) {
 							gerarSenha();
 							
@@ -488,15 +804,25 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 						    if (chkSimbolo.isSelected()) {
 						        caracteres.append("!@#$%^&*()-_=+[{]};:'\",<.>/?");
 						    }
-						 // Obtém o comprimento da senha pegando o numero que vai ta naquele spinner lá
-						    int comprimento = (int) spnComprimento.getValue();
-						 // Gera a senha aleatória pra nois bem linda bem embaralhada
-					        char[] senha = new char[comprimento];
-					        for (int i = 0; i < comprimento; i++) {
-					            int index = random.nextInt(caracteres.length());
-					            senha[i] = caracteres.charAt(index);}
-							// Exibe a senha gerada num pop-up
-							JOptionPane.showMessageDialog(null, "Senha gerada: \n" + String.valueOf(senha), "Gerador de senha", JOptionPane.INFORMATION_MESSAGE);
+						
+						    if (caracteres.length() == 0) {
+					            JOptionPane.showMessageDialog(null, "Selecione pelo menos uma opção.", "Erro", JOptionPane.ERROR_MESSAGE);
+					        } else {
+					            // Obtém o comprimento da senha pegando o número que vai estar no spinner
+					            int comprimento = (int) spnComprimento.getValue();
+					            char[] senha = new char[comprimento];
+
+					            // Gera a senha aleatória
+					            for (int i = 0; i < comprimento; i++) {
+					                int index = random.nextInt(caracteres.length());
+					                senha[i] = caracteres.charAt(index);
+					                
+					            }
+					         // Exibe a senha gerada num pop-up
+								JOptionPane.showMessageDialog(null, "Senha gerada: \n" + String.valueOf(senha), "Gerador de senha", JOptionPane.INFORMATION_MESSAGE);
+					        }
+						   
+							
 						};
 					});
 					btnGerarSenha.setBounds(155, 100, 120, 25);
@@ -505,4 +831,19 @@ public class Paineis extends JFrame { // esse extends eh pra dizer que o Paineis
 				return painel2C;
 				};
 
+				private static class RoundedBorder implements Border {
+				    private int radius;
+				    RoundedBorder(int radius) {
+				        this.radius = radius;
+				    }
+				    public Insets getBorderInsets(Component c) {
+				        return new Insets(this.radius+1, this.radius+1, this.radius+2, this.radius);
+				    }
+				    public boolean isBorderOpaque() {
+				        return true;
+				    }
+				    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+				        g.drawRoundRect(x, y, width-1, height-1, radius, radius);
+				    }
+				};
 }
